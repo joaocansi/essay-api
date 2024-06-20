@@ -1,27 +1,31 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/joaocansi/essay-api/internal/config"
+	handler "github.com/joaocansi/essay-api/api/handler/user"
+	"github.com/joaocansi/essay-api/internal/repository"
 	"gorm.io/gorm"
 )
 
 type Server struct {
-	DB *gorm.DB
+	db *gorm.DB
 }
 
-func NewServer(DB *gorm.DB) *Server {
+func NewServer(db *gorm.DB) *Server {
 	return &Server{
-		DB: DB,
+		db: db,
 	}
 }
 
 func (s *Server) Listen() {
 	r := mux.NewRouter()
-	r.PathPrefix("/api/v1/")
+	subrouter := r.PathPrefix("/api/v1/").Subrouter()
 
-	http.ListenAndServe(fmt.Sprintf(":%v", config.Env.Api.Port), r)
+	userRepository := repository.NewUserRepository(s.db)
+	userHandler := handler.NewUserHandler(userRepository)
+	userHandler.RegisterRoutes(subrouter)
+
+	http.ListenAndServe(":8000", r)
 }
