@@ -20,8 +20,9 @@ type Api struct {
 }
 
 type Config struct {
-	DB  Database
-	Api Api
+	DB     Database
+	Api    Api
+	Secret string
 }
 
 var Env = loadConfig()
