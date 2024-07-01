@@ -1,13 +1,20 @@
 package main
 
 import (
-	"github.com/joaocansi/essay-api/api"
-	"github.com/joaocansi/essay-api/internal/config"
+	"log"
+
+	"github.com/joaocansi/essay-api/cmd/api"
 	"github.com/joaocansi/essay-api/internal/database"
 )
 
 func main() {
-	DB := database.NewDatabase(config.Env.DB)
-	server := api.NewServer(DB)
-	server.Listen()
+	db, err := database.NewDBConnection()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = api.NewApiServer(db).Listen()
+	if err != nil {
+		log.Fatal(err)
+	}
 }

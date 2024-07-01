@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"fmt"
-
 	"github.com/joaocansi/essay-api/internal/model"
 	"gorm.io/gorm"
 )
@@ -11,21 +9,21 @@ type UserRepository struct {
 	db *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) UserRepository {
-	return UserRepository{db: db}
+func NewUserRepository(db *gorm.DB) *UserRepository {
+	return &UserRepository{
+		db: db,
+	}
 }
 
-func (u *UserRepository) CreateUser(user *model.User) error {
-	if err := u.db.Create(user).Error; err != nil {
-		return err
-	}
-	return nil
+func (ur *UserRepository) CreateUser(user *model.User) error {
+	return ur.db.Create(user).Error
 }
 
-func (u *UserRepository) GetUserByEmail(email string) (*model.User, error) {
-	var user model.User
-	if u.db.Where("email = ?", email).First(&user); user.ID == 0 {
-		return nil, fmt.Errorf("email not found")
+func (ur *UserRepository) GetUserByEmail(email string) (*model.User, error) {
+	var user *model.User
+	err := ur.db.Where("email = ?", email).First(&user).Error
+	if err != nil {
+		return nil, err
 	}
-	return &user, nil
+	return user, nil
 }

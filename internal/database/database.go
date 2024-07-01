@@ -3,24 +3,22 @@ package database
 import (
 	"fmt"
 
-	"github.com/joaocansi/essay-api/internal/config"
-	"github.com/joaocansi/essay-api/internal/model"
+	"github.com/joaocansi/essay-api/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func NewDatabase(DB config.Database) *gorm.DB {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=UTC", DB.Host, DB.User, DB.Password, DB.Name, DB.Port)
+func NewDBConnection() (*gorm.DB, error) {
+	dsn := fmt.Sprintf("host=%v port=%v user=%v password=%v database=%v sslmode=disable TimeZone=UTC",
+		config.Env.Database.Host,
+		config.Env.Database.Port,
+		config.Env.Database.User,
+		config.Env.Database.Pass,
+		config.Env.Database.Name)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-
-	err = db.AutoMigrate(&model.User{})
-	if err != nil {
-		panic(err)
-	}
-
-	return db
+	return db, nil
 }
