@@ -6,7 +6,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	handler "github.com/joaocansi/essay-api/cmd/api/handler/user"
+	authHandler "github.com/joaocansi/essay-api/cmd/api/handler/auth"
+	userHandler "github.com/joaocansi/essay-api/cmd/api/handler/user"
 	"github.com/joaocansi/essay-api/config"
 	"github.com/joaocansi/essay-api/internal/repository"
 	"gorm.io/gorm"
@@ -27,8 +28,11 @@ func (as *APIServer) Listen() error {
 	w := r.PathPrefix("/api/v1").Subrouter()
 
 	userRepository := repository.NewUserRepository(as.db)
-	userHandler := handler.NewUserHandler(userRepository)
+	userHandler := userHandler.NewUserHandler(userRepository)
 	userHandler.Register(w)
+
+	authHandler := authHandler.NewAuthHandler(userRepository)
+	authHandler.Register(w)
 
 	log.Println("Listening on", config.Env.ServerPort)
 	return http.ListenAndServe(fmt.Sprintf(":%v", config.Env.ServerPort), r)

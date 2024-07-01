@@ -25,6 +25,10 @@ func (uh *UserHandler) Register(r *mux.Router) {
 	r.HandleFunc("/users", uh.CreateUser)
 }
 
+func (uh *UserHandler) Test(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var user CreateUserDTO
 
@@ -40,6 +44,12 @@ func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		httpres.New(w).InternalServerError()
+		return
+	}
+
+	user.Password, err = utils.HashPassword(user.Password)
+	if err != nil {
 		httpres.New(w).InternalServerError()
 		return
 	}
